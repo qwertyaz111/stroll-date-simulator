@@ -1,2 +1,0 @@
-# stroll-date-simulator
-おさんぽシミュレーター
