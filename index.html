@@ -16,6 +16,14 @@
         }
         @media screen and (max-width: 480px) { :root { --panel-width: 85vw; } }
         
+        /* 横持ち時のUI調整 */
+        @media screen and (orientation: landscape) and (max-height: 500px) {
+            :root { --panel-width: 260px; }
+            #ui-panel { top: 5px; left: 5px; padding: 10px; max-height: calc(100vh - 10px); }
+            .app-title { font-size: 1.1rem; }
+            .input-group { padding: 8px; margin-bottom: 5px; }
+        }
+
         .panel-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
         #toggle-text { font-size: 12px; font-weight: bold; color: #666; background: #eee; padding: 2px 8px; border-radius: 10px; }
         .collapsed #ui-content { display: none; }
@@ -58,9 +66,17 @@
         .switch-btn { width: 100%; padding: 12px; background: #333; color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px; -webkit-tap-highlight-color: transparent; margin-bottom: 15px; }
         .switch-btn:active { background: #000; transform: scale(0.98); }
         
-        .anim-controls { display: flex; gap: 8px; margin-bottom: 15px; }
+        .anim-controls { display: flex; gap: 8px; margin-bottom: 10px; }
         .btn-anim { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-anim.active { background: #333; color: #fff; border-color: #333; }
+
+        .sync-selector {
+            background: #f0f0f0; padding: 4px; border-radius: 10px; display: flex; margin-bottom: 15px; transition: opacity 0.3s;
+        }
+        .sync-selector button {
+            flex: 1; border: none; background: none; padding: 8px; font-size: 11px; font-weight: bold; cursor: pointer; border-radius: 7px; color: #666;
+        }
+        .sync-selector button.active { background: white; color: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
         .share-btn { 
             width: 100%; padding: 12px; background: #000; color: white; border: none; border-radius: 10px; 
@@ -71,51 +87,19 @@
         .share-btn:active { transform: scale(0.98); opacity: 0.8; }
 
         .other-tools-link {
-            margin-top: 20px;
-            padding: 10px;
-            background: #f9f9f9;
-            border-radius: 10px;
-            text-align: center;
+            margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 10px; text-align: center;
         }
         .other-tools-link a {
-            text-decoration: none;
-            color: #333;
-            font-size: 12px;
-            font-weight: bold;
-            border: 2px solid #333;
-            padding: 8px 15px;
-            border-radius: 30px;
-            display: inline-block;
-            transition: 0.3s;
-            margin: 4px;
+            text-decoration: none; color: #333; font-size: 12px; font-weight: bold; border: 2px solid #333; padding: 8px 15px; border-radius: 30px; display: inline-block; transition: 0.3s; margin: 4px;
         }
-        .other-tools-link a:hover {
-            background: #333;
-            color: #fff;
-        }
+        .other-tools-link a:hover { background: #333; color: #fff; }
 
-        .usage-notes {
-            font-size: 10px;
-            color: #999;
-            margin-top: 12px;
-            line-height: 1.5;
-            text-align: center;
-        }
+        .usage-notes { font-size: 10px; color: #999; margin-top: 12px; line-height: 1.5; text-align: center; }
 
         .info-box { 
-            background: #ffffff; 
-            padding: 15px; 
-            border-radius: 12px; 
-            margin-top: 12px; 
-            border: 1px solid #eee;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            background: #ffffff; padding: 15px; border-radius: 12px; margin-top: 12px; border: 1px solid #eee; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
-        .info-row { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: baseline; 
-            padding: 6px 0;
-        }
+        .info-row { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; }
         .info-row:not(:last-child) { border-bottom: 1px dashed #eee; margin-bottom: 4px; }
         .info-label { color: #555; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 4px; }
         .info-value { font-weight: 800; font-size: 18px; color: #2c3e50; font-variant-numeric: tabular-nums; }
@@ -135,8 +119,7 @@
     </div>
 
     <div id="ui-content">
-        <p class="app-description">性別と身長から一緒に歩く雰囲気をシミュレーションします。<br>
-            三人称/一人称視点の切り替えや、歩行アニメーションが可能です。</p>
+        <p class="app-description">性別と身長から一緒に歩く雰囲気をシミュレーションします。</p>
         
         <div class="app-disclaimer">
             ※初期値は日本人の平均値です。歩幅は「身長×0.45」で計算しています。
@@ -173,8 +156,14 @@
             </div>
             <div class="anim-controls">
                 <button id="btn-sync" class="btn-anim active" onclick="setMode('sync')">並んで歩く</button>
-                <button id="btn-free" class="btn-anim" onclick="setMode('free')">それぞれのペースで</button>
+                <button id="btn-free" class="btn-anim" onclick="setMode('free')">それぞれのペース</button>
             </div>
+            
+            <div class="sync-selector" id="sync-selector">
+                <button id="base-a" class="active" onclick="setSyncBase('A')">Aに合わせる</button>
+                <button id="base-b" onclick="setSyncBase('B')">Bに合わせる</button>
+            </div>
+
             <button class="switch-btn" onclick="switchView()">🔄 視点を切り替える</button>
         </div>
         
@@ -204,22 +193,13 @@
 <div class="crosshair" id="crosshair" style="display:none;"></div>
 <div id="canvas-container"></div>
 
-<script>
-    function togglePanel() {
-        const panel = document.getElementById('ui-panel');
-        const text = document.getElementById('toggle-text');
-        panel.classList.toggle('collapsed');
-        text.innerText = panel.classList.contains('collapsed') ? '開く' : '閉じる';
-    }
-</script>
-
 <script type="module">
     import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
 
     let scene, camera, renderer, clock;
     let personA, personB, walkGroup;
-    let currentView = '3rd'; // 3rd, A, B
-    let isWalking = false, walkMode = 'sync', walkTime = 0;
+    let currentView = '3rd';
+    let isWalking = false, walkMode = 'sync', walkTime = 0, syncBase = 'A';
     let rotation = { x: 0, y: 0 }, camDist = 4, isDragging = false, previousTouch = null;
 
     function init() {
@@ -241,6 +221,9 @@
 
         clock = new THREE.Clock();
         setupControls();
+
+        // 画面リサイズ（回転）対応
+        window.addEventListener('resize', onWindowResize);
         
         window.updateScene = updateScene;
         window.switchView = switchView;
@@ -254,11 +237,31 @@
             walkMode = m; window.resetAnimation();
             document.getElementById('btn-sync').classList.toggle('active', m==='sync');
             document.getElementById('btn-free').classList.toggle('active', m==='free');
+            const selector = document.getElementById('sync-selector');
+            selector.style.opacity = (m === 'sync' ? '1' : '0.3');
+            selector.style.pointerEvents = (m === 'sync' ? 'auto' : 'none');
+        };
+        window.setSyncBase = (b) => {
+            syncBase = b;
+            document.getElementById('base-a').classList.toggle('active', b==='A');
+            document.getElementById('base-b').classList.toggle('active', b==='B');
         };
         window.shareToX = shareToX;
+        window.togglePanel = () => {
+            const panel = document.getElementById('ui-panel');
+            const text = document.getElementById('toggle-text');
+            panel.classList.toggle('collapsed');
+            text.innerText = panel.classList.contains('collapsed') ? '開く' : '閉じる';
+        };
 
         updateScene();
         animate();
+    }
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
     function createMannequin(color, heightCm, gender, name) {
@@ -267,133 +270,88 @@
         const bodyMat = new THREE.MeshPhongMaterial({ color: color, transparent: true, opacity: 0.85 });
         const eyeMat = new THREE.MeshBasicMaterial({ color: 0x222222 });
 
-        const headH = h * 0.13;
-        const neckH = h * 0.05;
-        const torsoH = h * 0.37;
-        const legH = h * 0.45;
+        const headH = h * 0.13, neckH = h * 0.05, torsoH = h * 0.37, legH = h * 0.45;
         const eyeY = h * (gender === 'male' ? 0.904 : 0.903);
 
-        const headBox = new THREE.Group();
-        headBox.position.y = eyeY;
-        const headGeo = new THREE.SphereGeometry(headH * 0.8, 16, 16);
-        const head = new THREE.Mesh(headGeo, bodyMat);
-        head.position.y = (h - headH * 0.5) - eyeY;
-        headBox.add(head);
+        const headBox = new THREE.Group(); headBox.position.y = eyeY;
+        const head = new THREE.Mesh(new THREE.SphereGeometry(headH * 0.8, 16, 16), bodyMat);
+        head.position.y = (h - headH * 0.5) - eyeY; headBox.add(head);
 
-        const eyeSize = headH * 0.12;
         [-1, 1].forEach(side => {
-            const eye = new THREE.Mesh(new THREE.SphereGeometry(eyeSize, 12, 12), eyeMat);
-            eye.position.set(side * (headH * 0.28), 0, (headH * 0.7));
-            headBox.add(eye);
+            const eye = new THREE.Mesh(new THREE.SphereGeometry(headH * 0.12, 12, 12), eyeMat);
+            eye.position.set(side * (headH * 0.28), 0, (headH * 0.7)); headBox.add(eye);
         });
         group.add(headBox);
 
-        const neckW = headH * 0.3;
-        const neck = new THREE.Mesh(new THREE.CylinderGeometry(neckW, neckW, neckH, 16), bodyMat);
-        neck.position.y = h - headH - (neckH * 0.5);
-        group.add(neck);
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(headH*0.3, headH*0.3, neckH, 16), bodyMat);
+        neck.position.y = h - headH - (neckH * 0.5); group.add(neck);
 
         const torsoW = (gender === 'male' ? 0.26 : 0.21) * (h/1.7);
         const torso = new THREE.Mesh(new THREE.BoxGeometry(torsoW, torsoH, torsoW * 0.5), bodyMat);
-        torso.position.y = legH + (torsoH * 0.5);
-        group.add(torso);
+        torso.position.y = legH + (torsoH * 0.5); group.add(torso);
 
         group.arms = [];
-        const armW = torsoW * 0.3;
-        const armH = h * 0.38;
         [-1, 1].forEach(side => {
             const anchor = new THREE.Group();
-            anchor.position.set(side * (torsoW * 0.6), legH + torsoH - (armW * 0.5), 0);
-            const mesh = new THREE.Mesh(new THREE.BoxGeometry(armW, armH, armW), bodyMat);
-            mesh.position.y = -armH * 0.5;
-            anchor.add(mesh);
-            group.add(anchor);
-            group.arms.push(anchor);
+            anchor.position.set(side * (torsoW * 0.6), legH + torsoH - (torsoW*0.15), 0);
+            const mesh = new THREE.Mesh(new THREE.BoxGeometry(torsoW*0.3, h*0.38, torsoW*0.3), bodyMat);
+            mesh.position.y = -h*0.19; anchor.add(mesh); group.add(anchor); group.arms.push(anchor);
         });
 
         group.legs = [];
-        const legW = torsoW * 0.4;
         [-1, 1].forEach(side => {
-            const anchor = new THREE.Group();
-            anchor.position.set(side * (torsoW * 0.25), legH, 0);
-            const mesh = new THREE.Mesh(new THREE.BoxGeometry(legW, legH, legW), bodyMat);
-            mesh.position.y = -legH * 0.5;
-            anchor.add(mesh);
-            group.add(anchor);
-            group.legs.push(anchor);
+            const anchor = new THREE.Group(); anchor.position.set(side * (torsoW * 0.25), legH, 0);
+            const mesh = new THREE.Mesh(new THREE.BoxGeometry(torsoW*0.4, legH, torsoW*0.4), bodyMat);
+            mesh.position.y = -legH * 0.5; anchor.add(mesh); group.add(anchor); group.legs.push(anchor);
         });
 
         const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 128;
         const ctx = canvas.getContext('2d'); ctx.font = "bold 45px sans-serif"; ctx.fillStyle = "#333"; ctx.textAlign = "center";
-        const displayName = name || (gender === 'male' ? '名前B' : '名前A');
+        const displayName = name || (gender==='male'?'B':'A');
         ctx.fillText(`${displayName} (${heightCm.toFixed(1)}cm)`, 256, 64);
         const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas) }));
-        sprite.scale.set(1.5, 0.38, 1); sprite.position.y = h + 0.3;
-        group.add(sprite);
+        sprite.scale.set(1.5, 0.38, 1); sprite.position.y = h + 0.3; group.add(sprite);
 
         group.userData = { height: h, eyeY: eyeY, step: heightCm * 0.45 };
         return group;
     }
 
     function updateScene() {
-        const nA = document.getElementById('nameA').value, nB = document.getElementById('nameB').value;
-        const hA = parseFloat(document.getElementById('heightA').value) || 158, hB = parseFloat(document.getElementById('heightB').value) || 171.5;
-        const gA = document.getElementById('genderA').value, gB = document.getElementById('genderB').value;
-        const cA = document.getElementById('colorA').value, cB = document.getElementById('colorB').value;
-
+        const hA = parseFloat(document.getElementById('heightA').value)||158, hB = parseFloat(document.getElementById('heightB').value)||171.5;
         const posAZ = personA ? personA.position.z : 0, posBZ = personB ? personB.position.z : 0;
         if(personA) walkGroup.remove(personA); if(personB) walkGroup.remove(personB);
-
-        personA = createMannequin(cA, hA, gA, nA); personA.position.set(-0.5, 0, posAZ);
-        personB = createMannequin(cB, hB, gB, nB); personB.position.set(0.5, 0, posBZ);
-        walkGroup.add(personA, personB);
-
-        const stepA = hA * 0.45, stepB = hB * 0.45;
-        const diffH = Math.abs(hA - hB).toFixed(1);
-        const diffEye = Math.abs(personA.userData.eyeY - personB.userData.eyeY) * 100;
-        const diffStep = Math.abs(stepA - stepB).toFixed(1);
+        personA = createMannequin(document.getElementById('colorA').value, hA, document.getElementById('genderA').value, document.getElementById('nameA').value);
+        personB = createMannequin(document.getElementById('colorB').value, hB, document.getElementById('genderB').value, document.getElementById('nameB').value);
+        personA.position.set(-0.5, 0, posAZ); personB.position.set(0.5, 0, posBZ); walkGroup.add(personA, personB);
 
         document.getElementById('info').innerHTML = `
-            <div class="info-row"><span class="info-label">📏 身長差</span><span class="info-value">${diffH}<span class="unit">cm</span></span></div>
-            <div class="info-row"><span class="info-label">👣 歩幅の差</span><span class="info-value">${diffStep}<span class="unit">cm</span></span></div>
-            <div class="info-row"><span class="info-label">👁️ 目線の差</span><span class="info-value">${diffEye.toFixed(1)}<span class="unit">cm</span></span></div>
+            <div class="info-row"><span class="info-label">📏 身長差</span><span class="info-value">${Math.abs(hA-hB).toFixed(1)}<span class="unit">cm</span></span></div>
+            <div class="info-row"><span class="info-label">👣 歩幅の差</span><span class="info-value">${Math.abs(hA*0.45-hB*0.45).toFixed(1)}<span class="unit">cm</span></span></div>
         `;
-    }
-
-    function switchView() {
-        const order = ['3rd', 'A', 'B'];
-        currentView = order[(order.indexOf(currentView) + 1) % 3];
-        const labels = { '3rd': '三人称視点', 'A': `${document.getElementById('nameA').value || '名前A'}の視点`, 'B': `${document.getElementById('nameB').value || '名前B'}の視点` };
-        document.getElementById('view-label').innerText = labels[currentView];
-        document.getElementById('crosshair').style.display = currentView === '3rd' ? 'none' : 'block';
     }
 
     function animate() {
         requestAnimationFrame(animate);
         const dt = clock.getDelta();
-
         if (isWalking) {
             walkTime += dt;
-            const freq = 2.0;
+            const freq = 1.4;
             const sA = personA.userData.step * 0.01, sB = personB.userData.step * 0.01;
             if (walkMode === 'sync') {
-                const speed = sB * freq;
+                const speed = (syncBase === 'A' ? sA : sB) * freq;
                 personA.position.z += speed * dt; personB.position.z += speed * dt;
-                animateWalk(personA, walkTime, speed / sA); animateWalk(personB, walkTime, freq);
+                animateWalk(personA, walkTime, speed / sA); animateWalk(personB, walkTime, speed / sB);
             } else {
                 personA.position.z += sA * freq * dt; personB.position.z += sB * freq * dt;
                 animateWalk(personA, walkTime, freq); animateWalk(personB, walkTime, freq);
             }
         }
-
         const target = (currentView === 'B') ? personB : personA;
         if (currentView === '3rd') {
-            personA.visible = personB.visible = true;
             camera.position.set(target.position.x + Math.sin(rotation.y) * camDist, 1.5 + Math.sin(rotation.x) * camDist, target.position.z + Math.cos(rotation.y) * camDist);
             camera.lookAt(target.position.x, 1, target.position.z);
         } else {
-            const self = (currentView === 'A') ? personA : personB;
-            personA.visible = (currentView === 'B'); personB.visible = (currentView === 'A');
+            const self = (currentView === 'A' ? personA : personB);
             camera.position.set(self.position.x, self.userData.eyeY + self.position.y, self.position.z + 0.05);
             camera.rotation.set(rotation.x, rotation.y, 0);
         }
@@ -411,22 +369,31 @@
         const c = document.getElementById('canvas-container');
         const move = (dx, dy) => {
             rotation.y -= dx * 0.005; rotation.x -= dy * 0.005;
-            if(currentView !== '3rd') rotation.x = Math.max(-Math.PI/2.1, Math.min(Math.PI/2.1, rotation.x));
+            if(currentView !== '3rd') rotation.x = Math.max(-1.5, Math.min(1.5, rotation.x));
         };
-        c.onmousedown = () => isDragging = true;
-        window.onmouseup = () => isDragging = false;
+        c.onmousedown = () => isDragging = true; window.onmouseup = () => isDragging = false;
         window.onmousemove = e => { if(isDragging) move(e.movementX, e.movementY); };
         c.ontouchstart = e => { isDragging = true; previousTouch = e.touches[0]; };
         window.ontouchend = () => isDragging = false;
         window.ontouchmove = e => { if(isDragging && previousTouch) { move(e.touches[0].clientX - previousTouch.clientX, e.touches[0].clientY - previousTouch.clientY); previousTouch = e.touches[0]; } };
-        c.onwheel = e => { if(currentView === '3rd') camDist = Math.max(1, Math.min(20, camDist + e.deltaY * 0.005)); };
+    }
+
+    function switchView() {
+        const order = ['3rd', 'A', 'B']; currentView = order[(order.indexOf(currentView) + 1) % 3];
+        const nA = document.getElementById('nameA').value||'A', nB = document.getElementById('nameB').value||'B';
+        document.getElementById('view-label').innerText = {'3rd':'三人称視点','A':nA+'の視点','B':nB+'の視点'}[currentView];
+        document.getElementById('crosshair').style.display = currentView === '3rd' ? 'none' : 'block';
+        personA.visible = (currentView !== 'A'); personB.visible = (currentView !== 'B');
     }
 
     function shareToX() {
-        const nA = document.getElementById('nameA').value || '名前A', nB = document.getElementById('nameB').value || '名前B';
-        const hA = document.getElementById('heightA').value, hB = document.getElementById('heightB').value;
-        const diff = Math.abs(hA - hB).toFixed(1);
-        const text = `${nA}(${hA}cm)と${nB}(${hB}cm)が一緒におさんぽしました！\n#おさんぽシミュレーター\n`;
+        const nA = document.getElementById('nameA').value || 'A';
+        const nB = document.getElementById('nameB').value || 'B';
+        const hA = parseFloat(document.getElementById('heightA').value) || 158.0;
+        const hB = parseFloat(document.getElementById('heightB').value) || 171.5;
+
+        const text = `${nA}(${hA.toFixed(1)}cm)と${nB}(${hB.toFixed(1)}cm)が一緒におさんぽしました！\n#おさんぽシミュレーター\n`;
+        
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
     }
 
