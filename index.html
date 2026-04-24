@@ -329,10 +329,13 @@
                 animateWalk(personA, walkTime, freq); animateWalk(personB, walkTime, freq);
             }
         }
-        const target = (currentView === 'B') ? personB : personA;
+
         if (currentView === '3rd') {
-            camera.position.set(target.position.x + Math.sin(rotation.y) * camDist, 1.5 + Math.sin(rotation.x) * camDist, target.position.z + Math.cos(rotation.y) * camDist);
-            camera.lookAt(target.position.x, 1, target.position.z);
+            // 二人の中心点を計算して回転の基準にする
+            const centerX = (personA.position.x + personB.position.x) / 2;
+            const centerZ = (personA.position.z + personB.position.z) / 2;
+            camera.position.set(centerX + Math.sin(rotation.y) * camDist, 1.5 + Math.sin(rotation.x) * camDist, centerZ + Math.cos(rotation.y) * camDist);
+            camera.lookAt(centerX, 1, centerZ);
         } else {
             const self = (currentView === 'A' ? personA : personB);
             camera.position.set(self.position.x, self.userData.eyeY + self.position.y, self.position.z + 0.05);
